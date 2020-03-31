@@ -43,13 +43,17 @@
 
 #include <ecl.h>
 
-void DataValidator::put(uint64_t timestamp, float val, uint64_t error_count_in, int priority_in) {
-	float data[dimensions] = {val};  // sets the first value and all others to 0
+void
+DataValidator::put(uint64_t timestamp, float val, uint64_t error_count_in, int priority_in)
+{
+	float data[dimensions] = { val }; //sets the first value and all others to 0
+
 	put(timestamp, data, error_count_in, priority_in);
 }
 
-void DataValidator::put(uint64_t timestamp, const float val[dimensions], uint64_t error_count_in, int priority_in) {
-
+void
+DataValidator::put(uint64_t timestamp, const float val[dimensions], uint64_t error_count_in, int priority_in)
+{
 	_event_count++;
 
 	if (error_count_in > _error_count) {
@@ -84,6 +88,8 @@ void DataValidator::put(uint64_t timestamp, const float val[dimensions], uint64_
 			}
 		}
 
+		_vibe[i] = _vibe[i] * 0.99f + 0.01f * fabsf(val[i] - _lp[i]);
+
 		// XXX replace with better filter, make it auto-tune to update rate
 		_lp[i] = _lp[i] * 0.99f + 0.01f * val[i];
 
@@ -93,8 +99,9 @@ void DataValidator::put(uint64_t timestamp, const float val[dimensions], uint64_
 	_time_last = timestamp;
 }
 
-float DataValidator::confidence(uint64_t timestamp) {
-
+float
+DataValidator::confidence(uint64_t timestamp)
+{
 	float ret = 1.0f;
 
 	/* check if we have any data */
@@ -121,6 +128,7 @@ float DataValidator::confidence(uint64_t timestamp) {
 		/* cap error density counter at window size */
 		_error_mask |= ERROR_FLAG_HIGH_ERRDENSITY;
 		_error_density = ERROR_DENSITY_WINDOW;
+
 	}
 
 	/* no critical errors */
@@ -136,14 +144,17 @@ float DataValidator::confidence(uint64_t timestamp) {
 	return ret;
 }
 
-void DataValidator::print() {
+void
+DataValidator::print()
+{
 	if (_time_last == 0) {
 		ECL_INFO("\tno data");
 		return;
 	}
 
 	for (unsigned i = 0; i < dimensions; i++) {
-		ECL_INFO("\tval: %8.4f, lp: %8.4f mean dev: %8.4f RMS: %8.4f conf: %8.4f", (double)_value[i],
-			 (double)_lp[i], (double)_mean[i], (double)_rms[i], (double)confidence(ecl_absolute_time()));
+		ECL_INFO("\tval: %8.4f, lp: %8.4f mean dev: %8.4f RMS: %8.4f conf: %8.4f",
+			 (double) _value[i], (double)_lp[i], (double)_mean[i],
+			 (double)_rms[i], (double)confidence(ecl_absolute_time()));
 	}
 }

@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2019 Estimation and Control Library (ECL). All rights reserved.
+ *   Copyright (c) 2013-2016 Estimation and Control Library (ECL). All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,35 +32,61 @@
  ****************************************************************************/
 
 /**
- * Downsamples IMU data to a lower rate such that EKF predicition can happen less frequent
- * @author Kamil Ritz <ka.ritz@hotmail.com>
+ * @file ecl_yaw_controller.h
+ * Definition of a simple orthogonal coordinated turn yaw PID controller.
+ *
+ * @author Lorenz Meier <lm@inf.ethz.ch>
+ * @author Thomas Gubler <thomasgubler@gmail.com>
+ *
+ * Acknowledgements:
+ *
+ *   The control design is based on a design
+ *   by Paul Riseborough and Andrew Tridgell, 2013,
+ *   which in turn is based on initial work of
+ *   Jonathan Challinger, 2012.
  */
-#pragma once
+#ifndef ECL_YAW_CONTROLLER_H
+#define ECL_YAW_CONTROLLER_H
 
-#include <matrix/math.hpp>
-#include <mathlib/mathlib.h>
+#include "ecl_controller.h"
 
-#include "common.h"
-
-using namespace estimator;
-
-class ImuDownSampler
+class ECL_YawController :
+	public ECL_Controller
 {
 public:
-	ImuDownSampler(float target_dt_sec);
-	~ImuDownSampler();
+	ECL_YawController() = default;
+	~ECL_YawController() = default;
 
-	bool update(imuSample imu_sample_new);
-	imuSample getDownSampledImuAndTriggerReset();
+	float control_attitude(const struct ECL_ControlData &ctl_data) override;
+	float control_euler_rate(const struct ECL_ControlData &ctl_data) override;
+	float control_bodyrate(const struct ECL_ControlData &ctl_data) override;
 
-private:
-	imuSample _imu_down_sampled;
-	Quatf _delta_angle_accumulated;
-	const float _target_dt; // [sec]
-	float _imu_collection_time_adj;
-	bool _do_reset;
+	/* Additional setters */
+	void set_coordinated_min_speed(float coordinated_min_speed)
+	{
+		_coordinated_min_speed = coordinated_min_speed;
+	}
 
-	void reset();
+	void set_coordinated_method(int32_t coordinated_method)
+	{
+		_coordinated_method = coordinated_method;
+	}
+
+	enum {
+		COORD_METHOD_OPEN = 0,
+		COORD_METHOD_CLOSEACC = 1
+	};
+
+protected:
+	float _coordinated_min_speed{1.0f};
+	float _max_rate{0.0f};
+
+	int32_t _coordinated_method{COORD_METHOD_OPEN};
+
+	float control_attitude_impl_openloop(const struct ECL_ControlData &ctl_data);
+
+	float control_attitude_impl_accclosedloop(const struct ECL_ControlData &ctl_data);
 
 };
 
+#endif // ECL_YAW_CONTROLLER_H

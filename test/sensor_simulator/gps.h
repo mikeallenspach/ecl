@@ -57,9 +57,6 @@ public:
 	void setLatitude(int32_t lat);
 	void setLongitude(int32_t lon);
 	void setVelocity(const Vector3f& vel);
-	void setFixType(int n);
-	void setNumberOfSatellites(int n);
-	void setPdop(float pdop);
 
 	gps_message getDefaultGpsData();
 

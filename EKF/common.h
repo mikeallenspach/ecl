@@ -67,10 +67,26 @@ struct gps_message {
 	float epv;		///< GPS vertical position accuracy in m
 	float sacc;		///< GPS speed accuracy in m/s
 	float vel_m_s;		///< GPS ground speed (m/sec)
-	Vector3f vel_ned;	///< GPS ground speed NED
+	float vel_ned[3];	///< GPS ground speed NED - TODO: make Vector3f
 	bool vel_ned_valid;	///< GPS ground speed is valid
 	uint8_t nsats;		///< number of satellites used
 	float pdop;		///< position dilution of precision
+};
+
+struct flow_message {
+	uint8_t quality;	///< Quality of Flow data
+	Vector2f flowdata;	///< Optical flow rates about the X and Y body axes (rad/sec)
+	Vector3f gyrodata;	///< Gyro rates about the XYZ body axes (rad/sec)
+	uint32_t dt;		///< integration time of flow samples (microseconds)
+};
+
+struct ext_vision_message {
+	Vector3f pos;	///< XYZ position in external vision's local reference frame (m) - Z must be aligned with down axis
+	Vector3f vel;	///< XYZ velocity in external vision's local reference frame (m/sec) - Z must be aligned with down axis
+	Quatf quat;		///< quaternion defining rotation from body to earth frame
+	Vector3f posVar;	///< XYZ position variances (m**2)
+	Vector3f velVar;	///< XYZ velocity variances ((m/sec)**2)
+	float angVar;		///< angular heading variance (rad**2)
 };
 
 struct outputSample {
@@ -112,8 +128,8 @@ struct magSample {
 };
 
 struct baroSample {
-	float       hgt;	///< pressure altitude above sea level (m)
-	uint64_t    time_us;	///< timestamp of the measurement (uSec)
+	float       hgt{0.0f};	///< pressure altitude above sea level (m)
+	uint64_t    time_us{0};	///< timestamp of the measurement (uSec)
 };
 
 struct rangeSample {
@@ -124,14 +140,14 @@ struct rangeSample {
 
 struct airspeedSample {
 	float       true_airspeed;	///< true airspeed measurement (m/sec)
-	float       eas2tas;		///< equivalent to true airspeed factor
+	float 		eas2tas;	///< equivalent to true airspeed factor
 	uint64_t    time_us;		///< timestamp of the measurement (uSec)
 };
 
 struct flowSample {
 	uint8_t  quality;	///< quality indicator between 0 and 255
-	Vector2f flow_xy_rad;	///< measured delta angle of the image about the X and Y body axes (rad), RH rotation is positive
-	Vector3f gyro_xyz;	///< measured delta angle of the inertial frame about the body axes obtained from rate gyro measurements (rad), RH rotation is positive
+	Vector2f flowRadXY;	///< measured delta angle of the image about the X and Y body axes (rad), RH rotation is positive
+	Vector3f gyroXYZ;	///< measured delta angle of the inertial frame about the body axes obtained from rate gyro measurements (rad), RH rotation is positive
 	float    dt;		///< amount of integration time (sec)
 	uint64_t time_us;	///< timestamp of the integration period leading edge (uSec)
 };
@@ -177,12 +193,7 @@ struct auxVelSample {
 #define MASK_USE_DRAG  (1<<5)		///< set to true to use the multi-rotor drag model to estimate wind
 #define MASK_ROTATE_EV  (1<<6)		///< set to true to if the EV observations are in a non NED reference frame and need to be rotated before being used
 #define MASK_USE_GPSYAW  (1<<7)		///< set to true to use GPS yaw data if available
-#define MASK_USE_EVVEL  (1<<8)		///< set to true to use external vision velocity data
-
-enum TerrainFusionMask : int32_t {
-	TerrainFuseRangeFinder = (1 << 0),
-	TerrainFuseOpticalFlow = (1 << 1)
-};
+#define MASK_USE_EVVEL  (1<<8)		///< sset to true to use external vision velocity data
 
 // Integer definitions for mag_fusion_type
 #define MAG_FUSE_TYPE_AUTO      0	///< The selection of either heading or 3D magnetometer fusion will be automatic
@@ -209,8 +220,6 @@ struct parameters {
 	// measurement source control
 	int32_t fusion_mode{MASK_USE_GPS};		///< bitmasked integer that selects which aiding sources will be used
 	int32_t vdist_sensor_type{VDIST_SENSOR_BARO};	///< selects the primary source for height data
-	int32_t terrain_fusion_mode{TerrainFusionMask::TerrainFuseRangeFinder |
-				    TerrainFusionMask::TerrainFuseOpticalFlow}; ///< aiding source(s) selection bitmask for the terrain estimator
 	int32_t sensor_interval_min_ms{20};		///< minimum time of arrival difference between non IMU sensor updates. Sets the size of the observation buffers. (mSec)
 
 	// measurement time delays
@@ -230,7 +239,7 @@ struct parameters {
 
 	// process noise
 	float gyro_bias_p_noise{1.0e-3f};	///< process noise for IMU rate gyro bias prediction (rad/sec**2)
-	float accel_bias_p_noise{1.0e-2f};	///< process noise for IMU accelerometer bias prediction (m/sec**3)
+	float accel_bias_p_noise{6.0e-3f};	///< process noise for IMU accelerometer bias prediction (m/sec**3)
 	float mage_p_noise{1.0e-3f};		///< process noise for earth magnetic field prediction (Gauss/sec)
 	float magb_p_noise{1.0e-4f};		///< process noise for body magnetic field prediction (Gauss/sec)
 	float wind_vel_p_noise{1.0e-1f};	///< process noise for wind velocity prediction (m/sec**2)
@@ -265,7 +274,6 @@ struct parameters {
 	int32_t mag_fusion_type{0};		///< integer used to specify the type of magnetometer fusion used
 	float mag_acc_gate{0.5f};		///< when in auto select mode, heading fusion will be used when manoeuvre accel is lower than this (m/sec**2)
 	float mag_yaw_rate_gate{0.25f};		///< yaw rate threshold used by mode select logic (rad/sec)
-	float quat_max_variance{0.0001f};	///< zero innovation yaw measurements will not be fused when the sum of quaternion variance is less than this
 
 	// airspeed fusion
 	float tas_innov_gate{5.0f};		///< True Airspeed innovation consistency gate size (STD)
@@ -334,15 +342,6 @@ struct parameters {
 
 	int32_t valid_timeout_max{5000000};	///< amount of time spent inertial dead reckoning before the estimator reports the state estimates as invalid (uSec)
 
-	// static barometer pressure position error coefficient along body axes
-	float static_pressure_coef_xp {0.0f};	// (-)
-	float static_pressure_coef_xn {0.0f};	// (-)
-	float static_pressure_coef_yp {0.0f};	// (-)
-	float static_pressure_coef_yn {0.0f};	// (-)
-	float static_pressure_coef_z {0.0f};	// (-)
-	// upper limit on airspeed used for correction  (m/s**2)
-	float max_correction_airspeed {20.0f};
-
 	// multi-rotor drag specific force fusion
 	float drag_noise{2.5f};			///< observation noise variance for drag specific force measurements (m/sec**2)**2
 	float bcoef_x{25.0f};			///< ballistic coefficient along the X-axis (kg/m**2)
@@ -362,11 +361,6 @@ struct parameters {
 	// compute synthetic magnetomter Z value if possible
 	int32_t synthesize_mag_z{0};
 	int32_t check_mag_strength{0};
-
-	// Parameters used to control when yaw is reset to the EKF-GSF yaw estimator value
-	float EKFGSF_tas_default{15.0f};	///< default airspeed value assumed during fixed wing flight if no airspeed measurement available (m/s)
-	unsigned EKFGSF_reset_delay{1000000};	///< Number of uSec of bad innovations on main filter inpost takeoff phase before yaw is reset to EKF-GSF value
-	float EKFGSF_yaw_err_max{0.262f}; 	///< Composite yaw 1-sigma uncertainty threshold used to check for convergence (rad)
 };
 
 struct stateSample {
@@ -377,7 +371,7 @@ struct stateSample {
 	Vector3f    delta_vel_bias;	///< delta velocity bias estimate in m/s
 	Vector3f    mag_I;	///< NED earth magnetic field in gauss
 	Vector3f    mag_B;	///< magnetometer bias estimate in body frame in gauss
-	Vector2f    wind_vel;	///< horizontal wind velocity in earth frame in m/s
+	Vector2f    wind_vel;	///< wind velocity in m/s
 };
 
 union fault_status_u {
@@ -470,7 +464,6 @@ union filter_control_status_u {
 		uint32_t mag_aligned_in_flight   : 1; ///< 23 - true when the in-flight mag field alignment has been completed
 		uint32_t ev_vel      : 1; ///< 24 - true when local frame velocity data fusion from external vision measurements is intended
 		uint32_t synthetic_mag_z : 1; ///< 25 - true when we are using a synthesized measurement for the magnetometer Z component
-		uint32_t vehicle_at_rest : 1; ///< 26 - true when the vehicle is at rest
 	} flags;
 	uint32_t value;
 };

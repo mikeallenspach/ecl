@@ -62,8 +62,6 @@ public:
 
 	void stop(){ _is_running = false; }
 
-	bool should_send(uint64_t time) const;
-
 protected:
 
 	std::shared_ptr<Ekf> _ekf;
@@ -72,6 +70,8 @@ protected:
 	uint64_t _time_last_data_sent{0};
 
 	bool _is_running{false};
+
+	bool should_send(uint64_t time) const;
 
 	// Checks that the right amount time passed since last send data to fulfill rate
 	bool is_time_to_send(uint64_t time) const;

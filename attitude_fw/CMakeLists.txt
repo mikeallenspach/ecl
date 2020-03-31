@@ -1,6 +1,6 @@
 ############################################################################
 #
-#   Copyright (c) 2019 ECL Development Team. All rights reserved.
+#   Copyright (c) 2018 ECL Development Team. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -31,20 +31,13 @@
 #
 ############################################################################
 
-
-set(SRCS
-	sensor_simulator.cpp
-	ekf_wrapper.cpp
-	sensor.cpp
-	imu.cpp
-	mag.cpp
-	baro.cpp
-	gps.cpp
-	flow.cpp
-	range_finder.cpp
-	vio.cpp
-	airspeed.cpp
-   )
-
-add_library(ecl_sensor_sim ${SRCS})
-target_link_libraries(ecl_sensor_sim ecl_EKF)
+add_library(ecl_attitude_fw
+	ecl_controller.cpp
+	ecl_pitch_controller.cpp
+	ecl_roll_controller.cpp
+	ecl_wheel_controller.cpp
+	ecl_yaw_controller.cpp
+	)
+add_dependencies(ecl_attitude_fw prebuild_targets)
+target_compile_definitions(ecl_attitude_fw PRIVATE -DMODULE_NAME="ecl/attitude_fw")
+target_include_directories(ecl_attitude_fw PUBLIC ${ECL_SOURCE_DIR})

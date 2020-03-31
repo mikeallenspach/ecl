@@ -64,7 +64,7 @@ class EkfInitializationTest : public ::testing::Test {
 
 	void initializedOrienationIsMatchingGroundTruth(Quatf true_quaternion)
 	{
-		const Quatf quat_est = _ekf->getQuaternion();
+		Quatf quat_est = _ekf_wrapper.getQuaternion();
 		EXPECT_TRUE(matrix::isEqual(quat_est, true_quaternion));
 	}
 
@@ -86,8 +86,8 @@ class EkfInitializationTest : public ::testing::Test {
 
 	void velocityAndPositionCloseToZero()
 	{
-		const Vector3f pos = _ekf->getPosition();
-		const Vector3f vel = _ekf->getVelocity();
+		Vector3f pos = _ekf_wrapper.getPosition();
+		Vector3f vel = _ekf_wrapper.getVelocity();
 
 		EXPECT_TRUE(matrix::isEqual(pos, Vector3f{}, 0.001f));
 		EXPECT_TRUE(matrix::isEqual(vel, Vector3f{}, 0.001f));
@@ -95,8 +95,8 @@ class EkfInitializationTest : public ::testing::Test {
 
 	void velocityAndPositionVarianceBigEnoughAfterOrientationInitialization()
 	{
-		const Vector3f pos_var = _ekf->getPositionVariance();
-		const Vector3f vel_var = _ekf->getVelocityVariance();
+		Vector3f pos_var = _ekf_wrapper.getPositionVariance();
+		Vector3f vel_var = _ekf_wrapper.getVelocityVariance();
 
 		const float pos_variance_limit = 0.2f;
 		EXPECT_TRUE(pos_var(0) > pos_variance_limit) << "pos_var(1)" << pos_var(0);

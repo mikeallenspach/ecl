@@ -10,54 +10,6 @@ EkfWrapper::~EkfWrapper()
 {
 }
 
-void EkfWrapper::setBaroHeight()
-{
-	_ekf_params->vdist_sensor_type = VDIST_SENSOR_BARO;
-}
-
-bool EkfWrapper::isIntendingBaroHeightFusion() const
-{
-	filter_control_status_u control_status;
-	_ekf->get_control_mode(&control_status.value);
-	return control_status.flags.baro_hgt;
-}
-
-void EkfWrapper::setGpsHeight()
-{
-	_ekf_params->vdist_sensor_type = VDIST_SENSOR_GPS;
-}
-
-bool EkfWrapper::isIntendingGpsHeightFusion() const
-{
-	filter_control_status_u control_status;
-	_ekf->get_control_mode(&control_status.value);
-	return control_status.flags.gps_hgt;
-}
-
-void EkfWrapper::setRangeHeight()
-{
-	_ekf_params->vdist_sensor_type = VDIST_SENSOR_RANGE;
-}
-
-bool EkfWrapper::isIntendingRangeHeightFusion() const
-{
-	filter_control_status_u control_status;
-	_ekf->get_control_mode(&control_status.value);
-	return control_status.flags.rng_hgt;
-}
-
-void EkfWrapper::setVisionHeight()
-{
-	_ekf_params->vdist_sensor_type = VDIST_SENSOR_EV;
-}
-
-bool EkfWrapper::isIntendingVisionHeightFusion() const
-{
-	filter_control_status_u control_status;
-	_ekf->get_control_mode(&control_status.value);
-	return control_status.flags.ev_hgt;
-}
-
 void EkfWrapper::enableGpsFusion()
 {
 	_ekf_params->fusion_mode |= MASK_USE_GPS;
@@ -153,19 +105,74 @@ void EkfWrapper::disableExternalVisionAlignment()
 	_ekf_params->fusion_mode &= ~MASK_ROTATE_EV;
 }
 
-bool EkfWrapper::isWindVelocityEstimated() const
+Vector3f EkfWrapper::getPosition() const
 {
-	filter_control_status_u control_status;
-	_ekf->get_control_mode(&control_status.value);
-	return control_status.flags.wind;
+	float temp[3];
+	_ekf->get_position(temp);
+	return Vector3f(temp);
+}
+Vector3f EkfWrapper::getVelocity() const
+{
+	float temp[3];
+	_ekf->get_velocity(temp);
+	return Vector3f(temp);
+}
+Vector3f EkfWrapper::getAccelBias() const
+{
+	float temp[3];
+	_ekf->get_accel_bias(temp);
+	return Vector3f(temp);
+}
+
+Vector3f EkfWrapper::getGyroBias() const
+{
+	float temp[3];
+	_ekf->get_gyro_bias(temp);
+	return Vector3f(temp);
+}
+
+Quatf EkfWrapper::getQuaternion() const
+{
+	return _ekf->get_quaternion();
 }
 
 Eulerf EkfWrapper::getEulerAngles() const
 {
-	return Eulerf(_ekf->getQuaternion());
+	return Eulerf(getQuaternion());
+}
+
+matrix::Vector<float, 24> EkfWrapper::getState() const
+{
+	float state[24];
+	_ekf->get_state_delayed(state);
+	return matrix::Vector<float, 24>{state};
 }
 
 matrix::Vector<float, 4> EkfWrapper::getQuaternionVariance() const
 {
 	return matrix::Vector<float, 4>(_ekf->orientation_covariances().diag());
+}
+
+Vector3f EkfWrapper::getPositionVariance() const
+{
+	return Vector3f(_ekf->position_covariances().diag());
+}
+
+Vector3f EkfWrapper::getVelocityVariance() const
+{
+	return Vector3f(_ekf->velocity_covariances().diag());
+}
+
+Vector2f EkfWrapper::getWindVelocity() const
+{
+	float temp[2];
+	_ekf->get_wind_velocity(temp);
+	return Vector2f(temp);
+}
+
+Quatf EkfWrapper::getVisionAlignmentQuaternion() const
+{
+	float temp[4];
+	_ekf->get_ev2ekf_quaternion(temp);
+	return Quatf(temp);
 }

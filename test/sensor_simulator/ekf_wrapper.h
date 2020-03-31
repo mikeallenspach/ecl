@@ -47,19 +47,6 @@ public:
 	EkfWrapper(std::shared_ptr<Ekf> ekf);
 	~EkfWrapper();
 
-
-	void setBaroHeight();
-	bool isIntendingBaroHeightFusion() const;
-
-	void setGpsHeight();
-	bool isIntendingGpsHeightFusion() const;
-
-	void setRangeHeight();
-	bool isIntendingRangeHeightFusion() const;
-
-	void setVisionHeight();
-	bool isIntendingVisionHeightFusion() const;
-
 	void enableGpsFusion();
 	void disableGpsFusion();
 	bool isIntendingGpsFusion() const;
@@ -83,10 +70,19 @@ public:
 	void enableExternalVisionAlignment();
 	void disableExternalVisionAlignment();
 
-	bool isWindVelocityEstimated() const;
-
+	Vector3f getPosition() const;
+	Vector3f getVelocity() const;
+	Vector3f getAccelBias() const;
+	Vector3f getGyroBias() const;
+	Quatf getQuaternion() const;
 	Eulerf getEulerAngles() const;
+	matrix::Vector<float, 24> getState() const;
 	matrix::Vector<float, 4> getQuaternionVariance() const;
+	Vector3f getPositionVariance() const;
+	Vector3f getVelocityVariance() const;
+	Vector2f getWindVelocity() const;
+
+	Quatf getVisionAlignmentQuaternion() const;
 
 private:
 	std::shared_ptr<Ekf> _ekf;

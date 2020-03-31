@@ -385,13 +385,18 @@ bool Ekf::resetGpsAntYaw()
 		if (delta_ang_error.norm() > math::radians(15.0f) || !_control_status.flags.yaw_align) {
 			// update quaternion states
 			_state.quat_nominal = quat_after_reset;
-			uncorrelateQuatFromOtherStates();
+			uncorrelateQuatStates();
 
 			// record the state change
 			_state_reset_status.quat_change = q_error;
 
 			// update transformation matrix from body to world frame using the current estimate
 			_R_to_earth = Dcmf(_state.quat_nominal);
+
+			// reset the rotation from the EV to EKF frame of reference if it is being used
+			if ((_params.fusion_mode & MASK_ROTATE_EV) && (_params.fusion_mode & MASK_USE_EVPOS)) {
+				resetExtVisRotMat();
+			}
 
 			// update the yaw angle variance using the variance of the measurement
 			increaseQuatYawErrVariance(sq(fmaxf(_params.mag_heading_noise, 1.0e-2f)));

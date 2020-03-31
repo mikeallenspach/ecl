@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2019-2020 ECL Development Team. All rights reserved.
+ *   Copyright (c) 2019 ECL Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -51,7 +51,7 @@ class EkfBasicsTest : public ::testing::Test {
 
 
 	// Duration of initalization with only providing baro,mag and IMU
-	const uint32_t _init_duration_s{3};
+	const uint32_t _init_duration_s{2};
 
 	// Setup the Ekf with synthetic measurements
 	void SetUp() override
@@ -113,11 +113,11 @@ TEST_F(EkfBasicsTest, convergesToZero)
 	// GIVEN: initialized EKF with default IMU, baro and mag input
 	_sensor_simulator.runSeconds(4);
 
-	const Vector3f pos = _ekf->getPosition();
-	const Vector3f vel = _ekf->getVelocity();
-	const Vector3f accel_bias = _ekf->getAccelBias();
-	const Vector3f gyro_bias = _ekf->getGyroBias();
-	const Vector3f ref{0.0f, 0.0f, 0.0f};
+	Vector3f pos = _ekf_wrapper.getPosition();
+	Vector3f vel = _ekf_wrapper.getVelocity();
+	Vector3f accel_bias = _ekf_wrapper.getAccelBias();
+	Vector3f gyro_bias = _ekf_wrapper.getGyroBias();
+	Vector3f ref{0.0f, 0.0f, 0.0f};
 
 	// THEN: EKF should stay or converge to zero
 	EXPECT_TRUE(matrix::isEqual(pos, ref, 0.001f));
@@ -166,23 +166,23 @@ TEST_F(EkfBasicsTest, gpsFusion)
 
 TEST_F(EkfBasicsTest, accleBiasEstimation)
 {
-	// GIVEN: initialized EKF with default IMU, baro and mag input for 3s
+	// GIVEN: initialized EKF with default IMU, baro and mag input for 2s
 	// WHEN: Added more sensor measurements with accel bias and gps measurements
-	const Vector3f accel_bias_sim = {0.0f,0.0f,0.1f};
+	Vector3f accel_bias_sim = {0.0f,0.0f,0.1f};
 
 	_sensor_simulator.startGps();
 	_sensor_simulator.setImuBias(accel_bias_sim, Vector3f{0.0f,0.0f,0.0f});
 	_sensor_simulator.runSeconds(10);
 
-	const Vector3f pos = _ekf->getPosition();
-	const Vector3f vel = _ekf->getVelocity();
-	const Vector3f accel_bias = _ekf->getAccelBias();
-	const Vector3f gyro_bias = _ekf->getGyroBias();
-	const Vector3f zero{0.0f, 0.0f, 0.0f};
+	Vector3f pos = _ekf_wrapper.getPosition();
+	Vector3f vel = _ekf_wrapper.getVelocity();
+	Vector3f accel_bias = _ekf_wrapper.getAccelBias();
+	Vector3f gyro_bias = _ekf_wrapper.getGyroBias();
+	Vector3f zero{0.0f, 0.0f, 0.0f};
 
 	// THEN: EKF should stay or converge to zero
-	EXPECT_TRUE(matrix::isEqual(pos, zero, 0.01f));
-	EXPECT_TRUE(matrix::isEqual(vel, zero, 0.005f));
+	EXPECT_TRUE(matrix::isEqual(pos, zero, 0.001f));
+	EXPECT_TRUE(matrix::isEqual(vel, zero, 0.001f));
 	EXPECT_TRUE(matrix::isEqual(accel_bias, accel_bias_sim, 0.001f));
 	EXPECT_TRUE(matrix::isEqual(gyro_bias, zero, 0.001f));
 }

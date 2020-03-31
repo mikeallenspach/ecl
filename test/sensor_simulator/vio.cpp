@@ -15,11 +15,10 @@ Vio::~Vio()
 
 void Vio::send(uint64_t time)
 {
-	_vio_data.time_us = time;
-	_ekf->setExtVisionData(_vio_data);
+	_ekf->setExtVisionData(time, &_vio_data);
 }
 
-void Vio::setData(const extVisionSample& vio_data)
+void Vio::setData(const ext_vision_message& vio_data)
 {
 	_vio_data = vio_data;
 }
@@ -54,9 +53,9 @@ void Vio::setOrientation(const Quatf& quat)
 	_vio_data.quat = quat;
 }
 
-extVisionSample Vio::dataAtRest()
+ext_vision_message Vio::dataAtRest()
 {
-	extVisionSample vio_data;
+	ext_vision_message vio_data;
 	vio_data.pos = Vector3f{0.0f, 0.0f, 0.0f};;
 	vio_data.vel = Vector3f{0.0f, 0.0f, 0.0f};;
 	vio_data.quat = Quatf{1.0f, 0.0f, 0.0f, 0.0f};

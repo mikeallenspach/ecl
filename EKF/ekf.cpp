@@ -67,6 +67,8 @@ void Ekf::reset()
 	_output_new.pos.setZero();
 	_output_new.quat_nominal.setIdentity();
 
+	initialiseCovariance();
+
 	_delta_angle_corr.setZero();
 
 	_imu_updated = false;
@@ -82,8 +84,6 @@ void Ekf::reset()
 	_control_status_prev.value = 0;
 
 	_dt_ekf_avg = FILTER_UPDATE_PERIOD_S;
-
-	_ang_rate_delayed_raw.zero();
 
 	_fault_status.value = 0;
 	_innov_check_fail_status.value = 0;
@@ -107,6 +107,9 @@ bool Ekf::update()
 
 	// Only run the filter if IMU data in the buffer has been updated
 	if (_imu_updated) {
+		const imuSample &imu_init = _imu_buffer.get_newest();
+		_accel_lpf.update(imu_init.delta_vel);
+
 		// perform state and covariance prediction for the main filter
 		predictState();
 		predictCovariance();
@@ -118,9 +121,6 @@ bool Ekf::update()
 		runTerrainEstimator();
 
 		updated = true;
-
-		// run EKF-GSF yaw estimator
-		runYawEKFGSF();
 	}
 
 	// the output observer always runs
@@ -132,21 +132,18 @@ bool Ekf::update()
 
 bool Ekf::initialiseFilter()
 {
+	// Keep accumulating measurements until we have a minimum of 10 samples for the required sensors
+
 	// Filter accel for tilt initialization
 	const imuSample &imu_init = _imu_buffer.get_newest();
 
-	// protect against zero data
-	if (imu_init.delta_vel_dt < 1e-4f || imu_init.delta_ang_dt < 1e-4f) {
-		return false;
-	}
-
-	if (_is_first_imu_sample) {
-		_accel_lpf.reset(imu_init.delta_vel / imu_init.delta_vel_dt);
-		_gyro_lpf.reset(imu_init.delta_ang / imu_init.delta_ang_dt);
+	if(_is_first_imu_sample){
+		_accel_lpf.reset(imu_init.delta_vel);
 		_is_first_imu_sample = false;
-	} else {
-		_accel_lpf.update(imu_init.delta_vel / imu_init.delta_vel_dt);
-		_gyro_lpf.update(imu_init.delta_ang / imu_init.delta_ang_dt);
+	}
+	else
+	{
+		_accel_lpf.update(imu_init.delta_vel);
 	}
 
 	// Sum the magnetometer measurements
@@ -198,8 +195,6 @@ bool Ekf::initialiseFilter()
 		// calculate the initial magnetic field and yaw alignment
 		_control_status.flags.yaw_align = resetMagHeading(_mag_lpf.getState(), false, false);
 
-		// initialise the state covariance matrix now we have starting values for all the states
-		initialiseCovariance();
 
 		// update the yaw angle variance using the variance of the measurement
 		if (_params.mag_fusion_type <= MAG_FUSE_TYPE_3D) {
@@ -227,11 +222,7 @@ bool Ekf::initialiseFilter()
 
 bool Ekf::initialiseTilt()
 {
-	const float accel_norm = _accel_lpf.getState().norm();
-	const float gyro_norm = _gyro_lpf.getState().norm();
-	if (accel_norm < 0.9f * CONSTANTS_ONE_G ||
-	    accel_norm > 1.1f * CONSTANTS_ONE_G ||
-	    gyro_norm > math::radians(15.0f)) {
+	if (_accel_lpf.getState().norm() < 0.001f) {
 		return false;
 	}
 
@@ -254,8 +245,8 @@ void Ekf::predictState()
 	Vector3f corrected_delta_ang = _imu_sample_delayed.delta_ang - _state.delta_ang_bias;
 	const Vector3f corrected_delta_vel = _imu_sample_delayed.delta_vel - _state.delta_vel_bias;
 
-	// subtract component of angular rate due to earth rotation
-	corrected_delta_ang -= _R_to_earth.transpose() * _earth_rate_NED * _imu_sample_delayed.delta_ang_dt;
+	// correct delta angles for earth rotation rate
+	corrected_delta_ang -= -_R_to_earth.transpose() * _earth_rate_NED * _imu_sample_delayed.delta_ang_dt;
 
 	const Quatf dq(AxisAnglef{corrected_delta_ang});
 
@@ -296,14 +287,6 @@ void Ekf::predictState()
 	// filter and limit input between -50% and +100% of nominal value
 	input = math::constrain(input, 0.5f * FILTER_UPDATE_PERIOD_S, 2.0f * FILTER_UPDATE_PERIOD_S);
 	_dt_ekf_avg = 0.99f * _dt_ekf_avg + 0.01f * input;
-
-	// some calculations elsewhere in code require a raw angular rate vector so calculate here to avoid duplication
-	// protect angainst possible small timesteps resulting from timing slip on previous frame that can drive spikes into the rate
-	// due to insufficient averaging
-	if (_imu_sample_delayed.delta_ang_dt > 0.25f * FILTER_UPDATE_PERIOD_S) {
-		_ang_rate_delayed_raw = _imu_sample_delayed.delta_ang / _imu_sample_delayed.delta_ang_dt;
-	}
-
 }
 
 /*
@@ -350,17 +333,17 @@ void Ekf::calculateOutputStates()
 	_R_to_earth_now = Dcmf(_output_new.quat_nominal);
 
 	// correct delta velocity for bias offsets
-	const Vector3f delta_vel_body{imu.delta_vel - _state.delta_vel_bias * dt_scale_correction};
+	const Vector3f delta_vel{imu.delta_vel - _state.delta_vel_bias * dt_scale_correction};
 
 	// rotate the delta velocity to earth frame
-	Vector3f delta_vel_earth{_R_to_earth_now * delta_vel_body};
+	Vector3f delta_vel_NED{_R_to_earth_now * delta_vel};
 
 	// correct for measured acceleration due to gravity
-	delta_vel_earth(2) += CONSTANTS_ONE_G * imu.delta_vel_dt;
+	delta_vel_NED(2) += CONSTANTS_ONE_G * imu.delta_vel_dt;
 
 	// calculate the earth frame velocity derivatives
 	if (imu.delta_vel_dt > 1e-4f) {
-		_vel_deriv = delta_vel_earth * (1.0f / imu.delta_vel_dt);
+		_vel_deriv_ned = delta_vel_NED * (1.0f / imu.delta_vel_dt);
 	}
 
 	// save the previous velocity so we can use trapezoidal integration
@@ -368,8 +351,8 @@ void Ekf::calculateOutputStates()
 
 	// increment the INS velocity states by the measurement plus corrections
 	// do the same for vertical state used by alternative correction algorithm
-	_output_new.vel += delta_vel_earth;
-	_output_vert_new.vel_d += delta_vel_earth(2);
+	_output_new.vel += delta_vel_NED;
+	_output_vert_new.vel_d += delta_vel_NED(2);
 
 	// use trapezoidal integration to calculate the INS position states
 	// do the same for vertical state used by alternative correction algorithm
@@ -427,13 +410,13 @@ void Ekf::calculateOutputStates()
 		_delta_angle_corr = delta_ang_error * att_gain;
 
 		// calculate velocity and position tracking errors
-		const Vector3f vel_err(_state.vel - _output_sample_delayed.vel);
-		const Vector3f pos_err(_state.pos - _output_sample_delayed.pos);
+		const Vector3f vel_err{_state.vel - _output_sample_delayed.vel};
+		const Vector3f pos_err{_state.pos - _output_sample_delayed.pos};
 
 		// collect magnitude tracking error for diagnostics
-		_output_tracking_error(0) = delta_ang_error.norm();
-		_output_tracking_error(1) = vel_err.norm();
-		_output_tracking_error(2) = pos_err.norm();
+		_output_tracking_error[0] = delta_ang_error.norm();
+		_output_tracking_error[1] = vel_err.norm();
+		_output_tracking_error[2] = pos_err.norm();
 
 		/*
 		 * Loop through the output filter state history and apply the corrections to the velocity and position states.

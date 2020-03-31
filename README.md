@@ -19,20 +19,23 @@ The library is BSD 3-clause licensed.
   * Matrix: A lightweight, BSD-licensed matrix math library: https://github.com/px4/matrix - it is automatically included as submodule.
 
 
-By following the steps mentioned below you can create a static library which can be included in projects:
+By following the steps mentioned below you can create a shared library which can be included in projects using `-l` flag of gcc:
 
 ```
-make
-// OR
 mkdir build/
 cd build/
 cmake ..
 make
 ```
 
-## Testing ECL
-By following the steps you can run the unit tests
+Alternatively, just run:
 
 ```
-make test
+./build.sh
+```
+## Testing ECL
+By following the steps you can run the in `test/` specified checks
+
+```
+make test  // run from main folder
 ```

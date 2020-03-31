@@ -391,10 +391,8 @@ fix_c_code('K_VEL.c');
 load('StatePrediction.mat');
 
 % Calculate the yaw (first rotation) angle from the 321 rotation sequence
-% Provide alternative angle that avoids singularity at +-pi/2 
-angMeasA = atan(Tbn(2,1)/Tbn(1,1));
-angMeasB = pi/2 - atan(Tbn(1,1)/Tbn(2,1));
-H_YAW321 = jacobian([angMeasA;angMeasB],stateVector); % measurement Jacobian
+angMeas = atan(Tbn(2,1)/Tbn(1,1));
+H_YAW321 = jacobian(angMeas,stateVector); % measurement Jacobian
 H_YAW321 = simplify(H_YAW321);
 ccode(H_YAW321,'file','calcH_YAW321.c');
 fix_c_code('calcH_YAW321.c');
@@ -407,10 +405,8 @@ reset(symengine);
 load('StatePrediction.mat');
 
 % Calculate the yaw (first rotation) angle from an Euler 312 sequence
-% Provide alternative angle that avoids singularity at +-pi/2 
-angMeasA = atan(-Tbn(1,2)/Tbn(2,2));
-angMeasB = pi/2 - atan(-Tbn(2,2)/Tbn(1,2));
-H_YAW312 = jacobian([angMeasA;angMeasB],stateVector); % measurement Jacobian
+angMeas = atan(-Tbn(1,2)/Tbn(2,2));
+H_YAW312 = jacobian(angMeas,stateVector); % measurement Jacobianclea
 H_YAW312 = simplify(H_YAW312);
 ccode(H_YAW312,'file','calcH_YAW312.c');
 fix_c_code('calcH_YAW312.c');

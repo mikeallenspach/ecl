@@ -46,8 +46,6 @@
 #include <math.h>
 #include <mathlib/mathlib.h>
 
-// Sets initial values for the covariance matrix
-// Do not call before quaternion states have been initialised
 void Ekf::initialiseCovariance()
 {
 	P.zero();
@@ -57,7 +55,11 @@ void Ekf::initialiseCovariance()
 
 	const float dt = FILTER_UPDATE_PERIOD_S;
 
-	resetQuatCov();
+	// define the initial angle uncertainty as variances for a rotation vector
+	Vector3f rot_vec_var;
+	rot_vec_var.setAll(sq(_params.initial_tilt_err));
+
+	initialiseQuatCovariances(rot_vec_var);
 
 	// velocity
 	P(4,4) = sq(fmaxf(_params.gps_vel_noise, 0.01f));
@@ -93,7 +95,14 @@ void Ekf::initialiseCovariance()
 	// record IMU bias state covariance reset time - used to prevent resets being performed too often
 	_last_imu_bias_cov_reset_us = _imu_sample_delayed.time_us;
 
-	resetMagCov();
+	// earth frame and body frame magnetic field
+	// set to observation variance
+	for (uint8_t index = 16; index <= 21; index ++) {
+		P(index,index) = sq(_params.mag_noise);
+	}
+
+	// save covariance data for re-use when auto-switching between heading and 3-axis fusion
+	saveMagCovData();
 
 	// wind
 	P(22,22) = sq(_params.initial_wind_uncertainty);
@@ -101,14 +110,15 @@ void Ekf::initialiseCovariance()
 
 }
 
-Vector3f Ekf::getPositionVariance() const
+void Ekf::get_pos_var(Vector3f &pos_var)
 {
-	return P.slice<3,3>(7,7).diag();
+	pos_var = P.slice<3,3>(7,7).diag();
 }
 
-Vector3f Ekf::getVelocityVariance() const
+void Ekf::get_vel_var(Vector3f &vel_var)
 {
-	return P.slice<3,3>(4,4).diag();
+	vel_var = P.slice<3,3>(4,4).diag();
+
 }
 
 void Ekf::predictCovariance()
@@ -801,7 +811,7 @@ void Ekf::fixCovarianceErrors(bool force_symmetry)
 
 		// if we have failed for 7 seconds continuously, reset the accel bias covariances to fix bad conditioning of
 		// the covariance matrix but preserve the variances (diagonals) to allow bias learning to continue
-		if (isTimedOut(_time_acc_bias_check, (uint64_t)7e6)) {
+		if (_time_last_imu - _time_acc_bias_check > (uint64_t)7e6) {
 
 			P.uncorrelateCovariance<3>(13);
 
@@ -857,41 +867,16 @@ void Ekf::fixCovarianceErrors(bool force_symmetry)
 
 void Ekf::resetMagRelatedCovariances()
 {
-	resetQuatCov();
-	resetMagCov();
-}
-
-void Ekf::resetQuatCov(){
-	zeroQuatCov();
-
-	// define the initial angle uncertainty as variances for a rotation vector
-	Vector3f rot_vec_var;
-	rot_vec_var.setAll(sq(_params.initial_tilt_err));
-
-	initialiseQuatCovariances(rot_vec_var);
-}
-
-void Ekf::zeroQuatCov()
-{
+	// set the quaternion covariance terms to zero
 	P.uncorrelateCovarianceSetVariance<2>(0, 0.0f);
 	P.uncorrelateCovarianceSetVariance<2>(2, 0.0f);
-}
 
-void Ekf::resetMagCov()
-{
-	// reset the corresponding rows and columns in the covariance matrix and
-	// set the variances on the magnetic field states to the measurement variance
-	clearMagCov();
-
+	// reset the field state variance to the observation variance
 	P.uncorrelateCovarianceSetVariance<3>(16, sq(_params.mag_noise));
 	P.uncorrelateCovarianceSetVariance<3>(19, sq(_params.mag_noise));
 
-	if (!_control_status.flags.mag_3D) {
-		// save covariance data for re-use when auto-switching between heading and 3-axis fusion
-		// if already in 3-axis fusion mode, the covariances are automatically saved when switching out
-		// of this mode
-		saveMagCovData();
-	}
+	// save covariance data for re-use when auto-switching between heading and 3-axis fusion
+	saveMagCovData();
 }
 
 void Ekf::clearMagCov()
@@ -909,26 +894,29 @@ void Ekf::zeroMagCov()
 void Ekf::resetWindCovariance()
 {
 	if (_tas_data_ready && (_imu_sample_delayed.time_us - _airspeed_sample_delayed.time_us < (uint64_t)5e5)) {
-		// Derived using EKF/matlab/scripts/Inertial Nav EKF/wind_cov.py
-		// TODO: explicitly include the sideslip angle in the derivation
-		Eulerf euler321(_state.quat_nominal);
-		const float euler_yaw = euler321(2);
-		const float R_TAS = sq(math::constrain(_params.eas_noise, 0.5f, 5.0f) * math::constrain(_airspeed_sample_delayed.eas2tas, 0.9f, 10.0f));
-		const float initial_sideslip_uncertainty = math::radians(15.0f);
-		const float initial_wind_var_body_y = sq(_airspeed_sample_delayed.true_airspeed * sinf(initial_sideslip_uncertainty));
-		const float R_yaw = sq(math::radians(10.0f));
+		// Use airspeed and zer sideslip assumption to set initial covariance values for wind states
 
-		// rotate wind velocity into earth frame aligned with vehicle yaw
-		const float Wx = _state.wind_vel(0) * cosf(euler_yaw) + _state.wind_vel(1) * sinf(euler_yaw);
-		const float Wy = -_state.wind_vel(0) * sinf(euler_yaw) + _state.wind_vel(1) * cosf(euler_yaw);
+		// calculate the wind speed and bearing
+		float spd = sqrtf(sq(_state.wind_vel(0)) + sq(_state.wind_vel(1)));
+		float yaw = atan2f(_state.wind_vel(1), _state.wind_vel(0));
 
-		// it is safer to remove all existing correlations to other states at this time
+		// calculate the uncertainty in wind speed and direction using the uncertainty in airspeed and sideslip angle
+		// used to calculate the initial wind speed
+		float R_spd = sq(math::constrain(_params.eas_noise, 0.5f, 5.0f) * math::constrain(_airspeed_sample_delayed.eas2tas, 0.9f, 10.0f));
+		float R_yaw = sq(math::radians(10.0f));
+
+		// calculate the variance and covariance terms for the wind states
+		float cos_yaw = cosf(yaw);
+		float sin_yaw = sinf(yaw);
+		float cos_yaw_2 = sq(cos_yaw);
+		float sin_yaw_2 = sq(sin_yaw);
+		float sin_cos_yaw = sin_yaw * cos_yaw;
+		float spd_2 = sq(spd);
 		P.uncorrelateCovarianceSetVariance<2>(22, 0.0f);
-
-		P(22,22) = R_TAS*sq(cosf(euler_yaw)) + R_yaw*sq(-Wx*sinf(euler_yaw) - Wy*cosf(euler_yaw)) + initial_wind_var_body_y*sq(sinf(euler_yaw));
-		P(22,23) = R_TAS*sinf(euler_yaw)*cosf(euler_yaw) + R_yaw*(-Wx*sinf(euler_yaw) - Wy*cosf(euler_yaw))*(Wx*cosf(euler_yaw) - Wy*sinf(euler_yaw)) - initial_wind_var_body_y*sinf(euler_yaw)*cosf(euler_yaw);
+		P(22,22) = R_yaw * spd_2 * sin_yaw_2 + R_spd * cos_yaw_2;
+		P(22,23) = - R_yaw * sin_cos_yaw * spd_2 + R_spd * sin_cos_yaw;
 		P(23,22) = P(22,23);
-		P(23,23) = R_TAS*sq(sinf(euler_yaw)) + R_yaw*sq(Wx*cosf(euler_yaw) - Wy*sinf(euler_yaw)) + initial_wind_var_body_y*sq(cosf(euler_yaw));
+		P(23,23) = R_yaw * spd_2 * cos_yaw_2 + R_spd * sin_yaw_2;
 
 		// Now add the variance due to uncertainty in vehicle velocity that was used to calculate the initial wind speed
 		P(22,22) += P(4,4);

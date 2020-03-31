@@ -39,15 +39,12 @@ set(SRCS
 	main.cpp
 	test_EKF_basics.cpp
 	test_EKF_ringbuffer.cpp
-	test_EKF_measurementSampling.cpp
 	test_EKF_imuSampling.cpp
 	test_AlphaFilter.cpp
 	test_EKF_fusionLogic.cpp
 	test_EKF_initialization.cpp
-	test_EKF_gps.cpp
 	test_EKF_externalVision.cpp
 	test_EKF_airspeed.cpp
-	test_EKF_withReplayData.cpp
    )
 add_executable(ECL_GTESTS ${SRCS})
 

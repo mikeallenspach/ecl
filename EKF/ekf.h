@@ -62,92 +62,92 @@ public:
 	// should be called every time new data is pushed into the filter
 	bool update() override;
 
-	void getGpsVelPosInnov(float hvel[2], float &vvel, float hpos[2], float &vpos) const override;
+	void getGpsVelPosInnov(float hvel[2], float &vvel, float hpos[2], float &vpos) override;
 
-	void getGpsVelPosInnovVar(float hvel[2], float &vvel, float hpos[2], float &vpos) const override;
+	void getGpsVelPosInnovVar(float hvel[2], float &vvel, float hpos[2], float &vpos) override;
 
-	void getGpsVelPosInnovRatio(float &hvel, float &vvel, float &hpos, float &vpos) const override;
+	void getGpsVelPosInnovRatio(float& hvel, float &vvel, float& hpos, float &vpos) override;
 
-	void getEvVelPosInnov(float hvel[2], float &vvel, float hpos[2], float &vpos) const override;
+	void getEvVelPosInnov(float hvel[2], float& vvel, float hpos[2], float& vpos) override;
 
-	void getEvVelPosInnovVar(float hvel[2], float &vvel, float hpos[2], float &vpos) const override;
+	void getEvVelPosInnovVar(float hvel[2], float &vvel, float hpos[2], float &vpos) override;
 
-	void getEvVelPosInnovRatio(float &hvel, float &vvel, float &hpos, float &vpos) const override;
+	void getEvVelPosInnovRatio(float& hvel, float &vvel, float& hpos, float &vpos) override;
 
-	void getBaroHgtInnov(float &baro_hgt_innov) const override;
+	void getBaroHgtInnov(float &baro_hgt_innov) override;
 
-	void getBaroHgtInnovVar(float &baro_hgt_innov_var) const override;
+	void getBaroHgtInnovVar(float &baro_hgt_innov_var) override;
 
-	void getBaroHgtInnovRatio(float &baro_hgt_innov_ratio) const override;
+	void getBaroHgtInnovRatio(float &baro_hgt_innov_ratio) override;
 
-	void getRngHgtInnov(float &rng_hgt_innov) const override;
+	void getRngHgtInnov(float &rng_hgt_innov) override;
 
-	void getRngHgtInnovVar(float &rng_hgt_innov_var) const override;
+	void getRngHgtInnovVar(float &rng_hgt_innov_var) override;
 
-	void getRngHgtInnovRatio(float &rng_hgt_innov_ratio) const override;
+	void getRngHgtInnovRatio(float &rng_hgt_innov_ratio) override;
 
-	void getAuxVelInnov(float aux_vel_innov[2]) const override;
+	void getAuxVelInnov(float aux_vel_innov[2]) override;
 
-	void getAuxVelInnovVar(float aux_vel_innov[2]) const override;
+	void getAuxVelInnovVar(float aux_vel_innov[2]) override;
 
-	void getAuxVelInnovRatio(float &aux_vel_innov_ratio) const override;
+	void getAuxVelInnovRatio(float &aux_vel_innov_ratio) override;
 
-	void getFlowInnov(float flow_innov[2]) const override;
+	void getFlowInnov(float flow_innov[2]) override;
 
-	void getFlowInnovVar(float flow_innov_var[2]) const override;
+	void getFlowInnovVar(float flow_innov_var[2]) override;
 
-	void getFlowInnovRatio(float &flow_innov_ratio) const override;
+	void getFlowInnovRatio(float &flow_innov_ratio) override;
 
-	void getHeadingInnov(float &heading_innov) const override;
+	void getHeadingInnov(float &heading_innov) override;
 
-	void getHeadingInnovVar(float &heading_innov_var) const override;
+	void getHeadingInnovVar(float &heading_innov_var) override;
 
-	void getHeadingInnovRatio(float &heading_innov_ratio) const override;
+	void getHeadingInnovRatio(float &heading_innov_ratio) override;
 
-	void getMagInnov(float mag_innov[3]) const override;
+	void getMagInnov(float mag_innov[3]) override;
 
-	void getMagInnovVar(float mag_innov_var[3]) const override;
+	void getMagInnovVar(float mag_innov_var[3]) override;
 
-	void getMagInnovRatio(float &mag_innov_ratio) const override;
+	void getMagInnovRatio(float &mag_innov_ratio) override;
 
-	void getDragInnov(float drag_innov[2]) const override;
+	void getDragInnov(float drag_innov[2]) override;
 
-	void getDragInnovVar(float drag_innov_var[2]) const override;
+	void getDragInnovVar(float drag_innov_var[2]) override;
 
-	void getDragInnovRatio(float drag_innov_ratio[2]) const override;
+	void getDragInnovRatio(float drag_innov_ratio[2]) override;
 
-	void getAirspeedInnov(float &airspeed_innov) const override;
+	void getAirspeedInnov(float &airspeed_innov) override;
 
-	void getAirspeedInnovVar(float &airspeed_innov_var) const override;
+	void getAirspeedInnovVar(float &airspeed_innov_var) override;
 
-	void getAirspeedInnovRatio(float &airspeed_innov_ratio) const override;
+	void getAirspeedInnovRatio(float &airspeed_innov_ratio) override;
 
-	void getBetaInnov(float &beta_innov) const override;
+	void getBetaInnov(float &beta_innov) override;
 
-	void getBetaInnovVar(float &beta_innov_var) const override;
+	void getBetaInnovVar(float &beta_innov_var) override;
 
-	void getBetaInnovRatio(float &beta_innov_ratio) const override;
+	void getBetaInnovRatio(float &beta_innov_ratio) override;
 
-	void getHaglInnov(float &hagl_innov) const override;
+	void getHaglInnov(float &hagl_innov) override;
 
-	void getHaglInnovVar(float &hagl_innov_var) const override;
+	void getHaglInnovVar(float &hagl_innov_var) override;
 
-	void getHaglInnovRatio(float &hagl_innov_ratio) const override;
+	void getHaglInnovRatio(float &hagl_innov_ratio) override;
 
 	// get the state vector at the delayed time horizon
-	matrix::Vector<float, 24> getStateAtFusionHorizonAsVector() const override;
+	void get_state_delayed(float *state) override;
 
 	// get the wind velocity in m/s
-	Vector2f getWindVelocity() const override;
+	void get_wind_velocity(float *wind) override;
 
 	// get the wind velocity var
-	Vector2f getWindVelocityVariance() const override;
+	void get_wind_velocity_var(float *wind_var) override;
 
 	// get the true airspeed in m/s
 	void get_true_airspeed(float *tas) override;
 
 	// get the full covariance matrix
-	const matrix::SquareMatrix<float, 24> &covariances() const { return P; }
+	matrix::SquareMatrix<float, 24> covariances() const { return P; }
 
 	// get the diagonal elements of the covariance matrix
 	matrix::Vector<float, 24> covariances_diagonal() const { return P.diag(); }
@@ -187,13 +187,13 @@ public:
 	*/
 	bool reset_imu_bias() override;
 
-	Vector3f getVelocityVariance() const override;
+	void get_vel_var(Vector3f &vel_var) override;
 
-	Vector3f getPositionVariance() const override;
+	void get_pos_var(Vector3f &pos_var) override;
 
 	// return an array containing the output predictor angular, velocity and position tracking
 	// error magnitudes (rad), (m/sec), (m)
-	Vector3f getOutputTrackingError() const override;
+	void get_output_tracking_error(float error[3]) override;
 
 	/*
 	Returns  following IMU vibration metrics in the following array locations
@@ -201,7 +201,7 @@ public:
 	1 : Gyro high frequency vibe = filtered length of (delta_angle - prev_delta_angle)
 	2 : Accel high frequency vibe = filtered length of (delta_velocity - prev_delta_velocity)
 	*/
-	Vector3f getImuVibrationMetrics() const override;
+	void get_imu_vibe_metrics(float vibe[3]) override;
 
 	/*
 	First argument returns GPS drift  metrics in the following array locations
@@ -224,16 +224,16 @@ public:
 	void updateTerrainValidity();
 
 	// get the estimated terrain vertical position relative to the NED origin
-	float getTerrainVertPos() const override;
+	void getTerrainVertPos(float *ret) override;
 
 	// get the terrain variance
 	float get_terrain_var() const { return _terrain_var; }
 
-	// get the accelerometer bias in m/s**2
-	Vector3f getAccelBias() const override;
+	// get the accelerometer bias in m/s/s
+	void get_accel_bias(float bias[3]) override;
 
 	// get the gyroscope bias in rad/s
-	Vector3f getGyroBias() const override;
+	void get_gyro_bias(float bias[3]) override;
 
 	// get GPS check status
 	void get_gps_check_status(uint16_t *val) override;
@@ -276,23 +276,13 @@ public:
 	void get_ekf_soln_status(uint16_t *status) override;
 
 	// return the quaternion defining the rotation from the External Vision to the EKF reference frame
-	matrix::Quatf getVisionAlignmentQuaternion() const override;
+	void get_ev2ekf_quaternion(float *quat) override;
 
 	// use the latest IMU data at the current time horizon.
 	Quatf calculate_quaternion() const;
 
 	// set minimum continuous period without GPS fail required to mark a healthy GPS status
 	void set_min_required_gps_health_time(uint32_t time_us) { _min_gps_health_time_us = time_us; }
-
-	// get solution data from the EKF-GSF emergency yaw estimator
-	// returns false when data is not available
-	bool getDataEKFGSF(float *yaw_composite, float *yaw_variance, float yaw[N_MODELS_EKFGSF], float innov_VN[N_MODELS_EKFGSF], float innov_VE[N_MODELS_EKFGSF], float weight[N_MODELS_EKFGSF]) override;
-
-	// Request the EKF reset the yaw to the estimate from the internal EKF-GSF filter
-	// and reset the velocity and position states to the GPS. This will cause the EKF
-	// to ignore the magnetometer for the remainder of flight.
-	// This should only be used as a last resort before activating a loss of navigation failsafe
-	void requestEmergencyNavReset() override;
 
 private:
 
@@ -314,18 +304,25 @@ private:
 	float _dt_ekf_avg{FILTER_UPDATE_PERIOD_S}; ///< average update rate of the ekf
 	float _dt_update{0.01f}; ///< delta time since last ekf update. This time can be used for filters which run at the same rate as the Ekf::update() function. (sec)
 
-	Vector3f _ang_rate_delayed_raw;	///< uncorrected angular rate vector at fusion time horizon (rad/sec)
-
 	stateSample _state{};		///< state struct of the ekf running at the delayed time horizon
 
 	bool _filter_initialised{false};	///< true when the EKF sttes and covariances been initialised
+
+	bool _fuse_height{false};	///< true when baro height data should be fused
+	bool _fuse_pos{false};		///< true when gps position data should be fused
+	bool _fuse_hor_vel{false};	///< true when gps horizontal velocity measurement should be fused
+	bool _fuse_vert_vel{false};	///< true when gps vertical velocity measurement should be fused
+	bool _fuse_hor_vel_aux{false};	///< true when auxiliary horizontal velocity measurement should be fused
 
 	// variables used when position data is being fused using a relative position odometry model
 	bool _fuse_hpos_as_odom{false};		///< true when the NE position data is being fused using an odometry assumption
 	Vector3f _pos_meas_prev;		///< previous value of NED position measurement fused using odometry assumption (m)
 	Vector2f _hpos_pred_prev;		///< previous value of NE position state used by odometry fusion (m)
 	bool _hpos_prev_available{false};	///< true when previous values of the estimate and measurement are available for use
+	AxisAnglef _ev_rot_vec_filt;		///< filtered rotation vector defining the rotation EV to EKF reference, initiliazied to zero rotation  (rad)
 	Dcmf _R_ev_to_ekf;			///< transformation matrix that rotates observations from the EV to the EKF navigation frame, initialized with Identity
+	uint64_t _ev_rot_last_time_us{0};	///< previous time that the calculation of the EV to EKF rotation matrix was updated (uSec)
+	bool _R_ev_to_ekf_initialised{0};	///< _R_ev_to_ekf should only be initialised once in the beginning through the reset function
 
 	// booleans true when fresh sensor data is available at the fusion time horizon
 	bool _gps_data_ready{false};	///< true when new GPS data has fallen behind the fusion time horizon and is available to be fused
@@ -337,7 +334,7 @@ private:
 	bool _tas_data_ready{false};	///< true when new true airspeed data has fallen behind the fusion time horizon and is available to be fused
 	bool _flow_for_terrain_data_ready{false}; /// same flag as "_flow_data_ready" but used for separate terrain estimator
 
-	uint64_t _time_last_aiding{0};	///< amount of time we have been doing inertial only deadreckoning (uSec)
+	uint64_t _time_ins_deadreckon_start{0};	///< amount of time we have been doing inertial only deadreckoning (uSec)
 	bool _using_synthetic_position{false};	///< true if we are using a synthetic position to constrain drift
 
 	uint64_t _time_last_hor_pos_fuse{0};	///< time the last fusion of horizontal position measurements was performed (uSec)
@@ -373,13 +370,13 @@ private:
 	uint64_t _time_yaw_started{0};		///< last system time in usec that a yaw rotation manoeuvre was detected
 	uint8_t _num_bad_flight_yaw_events{0};	///< number of times a bad heading has been detected in flight and required a yaw reset
 	uint64_t _mag_use_not_inhibit_us{0};	///< last system time in usec before magnetometer use was inhibited
+	bool _mag_use_inhibit{false};		///< true when magnetometer use is being inhibited
+	bool _mag_use_inhibit_prev{false};	///< true when magnetometer use was being inhibited the previous frame
 	bool _mag_inhibit_yaw_reset_req{false};	///< true when magnetometer inhibit has been active for long enough to require a yaw reset when conditions improve.
 	float _last_static_yaw{0.0f};		///< last yaw angle recorded when on ground motion checks were passing (rad)
 	bool _mag_yaw_reset_req{false};		///< true when a reset of the yaw using the magnetometer data has been requested
 	bool _mag_decl_cov_reset{false};	///< true after the fuseDeclination() function has been used to modify the earth field covariances after a magnetic field reset event.
 	bool _synthetic_mag_z_active{false};	///< true if we are generating synthetic magnetometer Z measurements
-
-	bool _yaw_use_inhibit{false};		///< true when yaw sensor use is being inhibited
 
 	matrix::SquareMatrix<float, _k_num_states> P;	///< state covariance matrix
 
@@ -435,13 +432,13 @@ private:
 	uint64_t _time_bad_motion_us{0};	///< last system time that on-ground motion exceeded limits (uSec)
 	uint64_t _time_good_motion_us{0};	///< last system time that on-ground motion was within limits (uSec)
 	bool _inhibit_flow_use{false};	///< true when use of optical flow and range finder is being inhibited
-	Vector2f _flow_compensated_XY_rad;	///< measured delta angle of the image about the X and Y body axes after removal of body rotation (rad), RH rotation is positive
+	Vector2f _flowRadXYcomp;	///< measured delta angle of the image about the X and Y body axes after removal of body rotation (rad), RH rotation is positive
 
 	// output predictor states
 	Vector3f _delta_angle_corr;	///< delta angle correction vector (rad)
 	Vector3f _vel_err_integ;	///< integral of velocity tracking error (m)
 	Vector3f _pos_err_integ;	///< integral of position tracking error (m.s)
-	Vector3f _output_tracking_error; ///< contains the magnitude of the angle, velocity and position track errors (rad, m/s, m)
+	float _output_tracking_error[3] {}; ///< contains the magnitude of the angle, velocity and position track errors (rad, m/s, m)
 
 	// variables used for the GPS quality checks
 	Vector3f _gps_pos_deriv_filt;	///< GPS NED position derivative (m/sec)
@@ -457,15 +454,12 @@ private:
 	uint64_t _last_gps_origin_time_us{0};	///< time the origin was last set (uSec)
 	float _gps_alt_ref{0.0f};		///< WGS-84 height (m)
 
-	// Variables used by the initial filter alignment
+	// Variables used to initialise the filter states
 	bool _is_first_imu_sample{true};
 	uint32_t _baro_counter{0};		///< number of baro samples read during initialisation
 	uint32_t _mag_counter{0};		///< number of magnetometer samples read during initialisation
-	AlphaFilterVector3f _accel_lpf;		///< filtered accelerometer measurement used to align tilt (m/s/s)
-	AlphaFilterVector3f _gyro_lpf;		///< filtered gyro measurement used for alignment excessive movement check (rad/sec)
-
-	// Variables used to perform in flight resets and switch between height sources
-	AlphaFilterVector3f _mag_lpf;		///< filtered magnetometer measurement for instant reset (Gauss)
+	AlphaFilterVector3f _mag_lpf;		///< filtered magnetometer measurement for instant reset(Gauss)
+	AlphaFilterVector3f _accel_lpf;		///< filtered accelerometer measurement for instant reset(Gauss)
 	float _hgt_sensor_offset{0.0f};		///< set as necessary if desired to maintain the same height after a height reset (m)
 	float _baro_hgt_offset{0.0f};		///< baro height reading at the local NED origin (m)
 
@@ -540,28 +534,6 @@ private:
 	// fuse the first euler angle from either a 321 or 312 rotation sequence as the observation (currently measures yaw using the magnetometer)
 	void fuseHeading();
 
-	// fuse the yaw angle defined as the first rotation in a 321 Tait-Bryan rotation sequence
-	// yaw : angle observation defined as the first rotation in a 321 Tait-Bryan rotation sequence (rad)
-	// yaw_variance : variance of the yaw angle observation (rad^2)
-	// zero_innovation : Fuse data with innovation set to zero
-	void fuseYaw321(const float yaw, const float yaw_variance, bool zero_innovation);
-
-	// fuse the yaw angle defined as the first rotation in a 312 Tait-Bryan rotation sequence
-	// yaw : angle observation defined as the first rotation in a 312 Tait-Bryan rotation sequence (rad)
-	// yaw_variance : variance of the yaw angle observation (rad^2)
-	// zero_innovation : Fuse data with innovation set to zero
-	void fuseYaw312(const float yaw, const float yaw_variance, bool zero_innovation);
-
-	// update quaternion states and covariances using an innovation, observation variance and Jacobian vector
-	// innovation : prediction - measurement
-	// variance : observaton variance
-	// gate_sigma : innovation consistency check gate size (Sigma)
-	// jacobian : 4x1 vector of partial derivatives of observation wrt each quaternion state
-	void updateQuaternion(const float innovation, const float variance, const float gate_sigma, const float (&yaw_jacobian)[4]);
-
-	// shrinks the yaw axis uncertainty of quaternion covariances by fusing a zero innovation yaw observation
-	void shrinkYawVariance();
-
 	// fuse the yaw angle obtained from a dual antenna GPS unit
 	void fuseGpsAntYaw();
 
@@ -594,17 +566,17 @@ private:
 	// fuse optical flow line of sight rate measurements
 	void fuseOptFlow();
 
-	bool fuseHorizontalVelocity(const Vector3f &innov, const Vector2f &innov_gate, const Vector3f &obs_var,
-				    Vector3f &innov_var, Vector2f &test_ratio);
+	bool fuseHorizontalVelocity(const Vector3f &innov, const Vector2f &innov_gate,
+				 const Vector3f &obs_var, Vector3f &innov_var, Vector2f &test_ratio);
 
-	bool fuseVerticalVelocity(const Vector3f &innov, const Vector2f &innov_gate, const Vector3f &obs_var,
-				  Vector3f &innov_var, Vector2f &test_ratio);
+	bool fuseVerticalVelocity(const Vector3f &innov, const Vector2f &innov_gate,
+				 const Vector3f &obs_var, Vector3f &innov_var, Vector2f &test_ratio);
 
-	bool fuseHorizontalPosition(const Vector3f &innov, const Vector2f &innov_gate, const Vector3f &obs_var,
-				    Vector3f &innov_var, Vector2f &test_ratio);
+	bool fuseHorizontalPosition(const Vector3f &innov, const Vector2f &innov_gate,
+				 const Vector3f &obs_var, Vector3f &innov_var, Vector2f &test_ratio);
 
-	bool fuseVerticalPosition(const Vector3f &innov, const Vector2f &innov_gate, const Vector3f &obs_var,
-				  Vector3f &innov_var, Vector2f &test_ratio);
+	bool fuseVerticalPosition(const Vector3f &innov, const Vector2f &innov_gate,
+				 const Vector3f &obs_var, Vector3f &innov_var, Vector2f &test_ratio);
 
 	// calculate optical flow body angular rate compensation
 	// returns false if bias corrected body rate data is unavailable
@@ -625,7 +597,7 @@ private:
 
 	// reset the heading and magnetic field states using the declination and magnetometer/external vision measurements
 	// return true if successful
-	bool resetMagHeading(const Vector3f &mag_init, bool increase_yaw_var = true, bool update_buffer = true);
+	bool resetMagHeading(const Vector3f &mag_init, bool increase_yaw_var = true, bool update_buffer=true);
 
 	// Do a forced re-alignment of the yaw angle to align with the horizontal velocity vector from the GPS.
 	// It is used to align the yaw angle after launch or takeoff for fixed wing vehicle.
@@ -643,8 +615,14 @@ private:
 	// modify output filter to match the the EKF state at the fusion time horizon
 	void alignOutputFilter();
 
-	// update the rotation matrix which transforms EV navigation frame measurements into NED
+	// update the estimated angular misalignment vector between the EV naigration frame and the EKF navigation frame
+	// and update the rotation matrix which transforms EV navigation frame measurements into NED
 	void calcExtVisRotMat();
+
+
+	// reset the estimated angular misalignment vector between the EV naigration frame and the EKF navigation frame
+	// and reset the rotation matrix which transforms EV navigation frame measurements into NED
+	void resetExtVisRotMat();
 
 	// limit the diagonal of the covariance matrix
 	// force symmetry when the argument is true
@@ -656,8 +634,6 @@ private:
 	// generic function which will perform a fusion step given a kalman gain K
 	// and a scalar innovation value
 	void fuse(float *K, float innovation);
-
-	float compensateBaroForDynamicPressure(float baro_alt_uncompensated) override;
 
 	// calculate the earth rotation vector from a given latitude
 	Vector3f calcEarthRateNED(float lat_rad) const;
@@ -736,8 +712,6 @@ private:
 	// control for height sensor timeouts, sensor changes and state resets
 	void controlHeightSensorTimeouts();
 
-	void checkVerticalAccelerationHealth();
-
 	// control for combined height fusion mode (implemented for switching between baro and range height)
 	void controlHeightFusion();
 
@@ -779,15 +753,10 @@ private:
 	Vector3f calcRotVecVariances();
 
 	// initialise the quaternion covariances using rotation vector variances
-	// do not call before quaternion states are initialised
 	void initialiseQuatCovariances(Vector3f &rot_vec_var);
 
-	// perform a limited reset of the magnetic field related state covariances
+	// perform a limited reset of the magnetic field state covariances
 	void resetMagRelatedCovariances();
-
-	void resetQuatCov();
-	void zeroQuatCov();
-	void resetMagCov();
 
 	// perform a limited reset of the wind state covariances
 	void resetWindCovariance();
@@ -811,7 +780,7 @@ private:
 	void zeroMagCov();
 
 	// uncorrelate quaternion states from other states
-	void uncorrelateQuatFromOtherStates();
+	void uncorrelateQuatStates();
 
 	// Use Kahan summation algorithm to get the sum of "sum_previous" and "input".
 	// This function relies on the caller to be responsible for keeping a copy of
@@ -821,17 +790,7 @@ private:
 
 	// calculate a synthetic value for the magnetometer Z component, given the 3D magnetomter
 	// sensor measurement
-	float calculate_synthetic_mag_z_measurement(const Vector3f &mag_meas, const Vector3f &mag_earth_predicted);
-
-	bool isTimedOut(uint64_t last_sensor_timestamp, uint64_t timeout_period) const
-	{
-		return last_sensor_timestamp + timeout_period < _time_last_imu;
-	}
-
-	bool isRecent(uint64_t sensor_timestamp, uint64_t acceptance_interval) const
-	{
-		return sensor_timestamp + acceptance_interval > _time_last_imu;
-	}
+	float calculate_synthetic_mag_z_measurement(const Vector3f& mag_meas, const Vector3f& mag_earth_predicted);
 
 	void stopGpsFusion();
 
@@ -854,33 +813,5 @@ private:
 	void stopFlowFusion();
 
 	void setVelPosFaultStatus(const int index, const bool status);
-
-	// reset the quaternion states and covariances to the new yaw value, preserving the roll and pitch
-	// yaw : Euler yaw angle (rad)
-	// yaw_variance : yaw error variance (rad^2)
-	// update_buffer : true if the state change should be also applied to the output observer buffer
-	void resetQuatStateYaw(float yaw, float yaw_variance, bool update_buffer);
-
-	// converts Tait-Bryan 312 sequence of rotations from frame 1 to frame 2
-	// to the corresponding rotation matrix that rotates from frame 2 to frame 1
-	// rot312(0) - First rotation is a RH rotation about the Z axis (rad)
-	// rot312(1) - Second rotation is a RH rotation about the X axis (rad)
-	// rot312(2) - Third rotation is a RH rotation about the Y axis (rad)
-	// See http://www.atacolorado.com/eulersequences.doc
-	Dcmf taitBryan312ToRotMat(const Vector3f &rot312);
-
-	// Declarations used to control use of the EKF-GSF yaw estimator
-
-	int64_t _ekfgsf_yaw_reset_time{0};	///< timestamp of last emergency yaw reset (uSec)
-	uint64_t _time_last_on_ground_us{0};	///< last tine we were on the ground (uSec)
-	bool _do_ekfgsf_yaw_reset{false};	// true when an emergency yaw reset has been requested
-
-	// Call once per _imu_sample_delayed update after all main EKF data fusion oeprations have been completed
-	void runYawEKFGSF();
-
-	// Resets the main Nav EKf yaw to the estimator from the EKF-GSF yaw estimator
-	// Resets the horizontal velocity and position to the default navigation sensor
-	// Returns true if the reset was successful
-	bool resetYawToEKFGSF();
 
 };
